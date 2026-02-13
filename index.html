@@ -440,6 +440,65 @@
       animation: cardEntrance 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
 
+    /* ── Yes flood overlay ── */
+    .yes-flood {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      grid-auto-rows: min-content;
+      gap: 6px;
+      padding: 8px;
+      align-content: start;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .yes-flood.active {
+      pointer-events: auto;
+    }
+
+    .yes-flood-btn {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      padding: 10px 6px;
+      border-radius: 50px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      background: var(--red);
+      color: var(--white);
+      border: 2px solid var(--red);
+      box-shadow: 0 2px 8px rgba(230, 57, 70, 0.25);
+      opacity: 0;
+      transform: scale(0);
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .yes-flood-btn.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .yes-flood-btn:active {
+      transform: scale(0.93);
+    }
+
+    @media (max-width: 480px) {
+      .yes-flood {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        gap: 5px;
+        padding: 6px;
+      }
+
+      .yes-flood-btn {
+        font-size: 0.85rem;
+        padding: 9px 4px;
+      }
+    }
+
     /* ── Mobile tweaks ── */
     @media (max-width: 480px) {
       .card {
@@ -538,7 +597,6 @@
     let gameOver = false;
     let noHealth = 100;
     let yesGrowthLevel = 0;
-    let decoyCount = 0;
 
     // ─── Phased messages: subtitle reacts to taps ───
     const subtitleMessages = [
@@ -584,8 +642,8 @@
     // ─── Phase logic ───
     // Phase 1 (taps 1-4): Playful — swap, jelly, text change, shake
     // Phase 2 (taps 5-9): Evasive — run away, dodge, shrink, spin
-    // Phase 3 (taps 10-14): Chaotic — fast moves, flip, clone Yes buttons, tiny
-    // Phase 4 (taps 15+): Surrender — button crumbles, gives up
+    // Phase 3 (taps 10-14): Chaotic — fast moves, flip, shrink smaller, spin
+    // Phase 4 (taps 15+): Screen floods with Yes buttons
 
     function getPhase() {
       if (tapCount <= 4) return 1;
@@ -597,7 +655,7 @@
     // Phase-specific trick pools
     const phase1Tricks = [swapButtons, jellyNo, changeNoText, shakeNo, bounceNo];
     const phase2Tricks = [runAway, spinNo, shrinkNo, changeNoText, shakeNo, dizzyNo];
-    const phase3Tricks = [runAwayFast, flipNo, spawnDecoyYes, shrinkSmaller, spinNo, dizzyNo];
+    const phase3Tricks = [runAwayFast, flipNo, shrinkSmaller, spinNo, dizzyNo, runAwayFast];
 
     let recentTricks = [];
 
@@ -634,8 +692,8 @@
         pickTrick(phase3Tricks)();
         growYesButton();
       } else {
-        // Phase 4: surrender sequence
-        surrenderSequence();
+        // Phase 4: flood the screen with Yes buttons
+        startYesFlood();
       }
     });
 
@@ -754,11 +812,15 @@
     }
 
     function moveNoRandom() {
-      const pad = 16;
-      const maxX = window.innerWidth - btnNo.offsetWidth - pad;
-      const maxY = window.innerHeight - btnNo.offsetHeight - pad;
-      const newX = pad + Math.random() * maxX;
-      const newY = pad + Math.random() * maxY;
+      const pad = 20;
+      // Use getBoundingClientRect for reliable size even after shrinking
+      const rect = btnNo.getBoundingClientRect();
+      const btnW = Math.max(rect.width, 60);
+      const btnH = Math.max(rect.height, 36);
+      const maxX = window.innerWidth - btnW - pad;
+      const maxY = window.innerHeight - btnH - pad;
+      const newX = Math.max(pad, Math.min(pad + Math.random() * maxX, maxX));
+      const newY = Math.max(pad, Math.min(pad + Math.random() * maxY, maxY));
 
       // Speed depends on phase
       const phase = getPhase();
@@ -771,8 +833,11 @@
 
     function dodgeFromPoint(px, py) {
       const rect = btnNo.getBoundingClientRect();
-      const btnCenterX = rect.left + rect.width / 2;
-      const btnCenterY = rect.top + rect.height / 2;
+      const btnW = Math.max(rect.width, 60);
+      const btnH = Math.max(rect.height, 36);
+      const btnCenterX = rect.left + btnW / 2;
+      const btnCenterY = rect.top + btnH / 2;
+      const pad = 20;
 
       // Move away from the point
       let dx = btnCenterX - px;
@@ -781,38 +846,30 @@
       dx /= dist;
       dy /= dist;
 
-      const flee = 120 + Math.random() * 80;
-      let newX = btnCenterX + dx * flee - rect.width / 2;
-      let newY = btnCenterY + dy * flee - rect.height / 2;
+      const flee = 130 + Math.random() * 80;
+      let newX = btnCenterX + dx * flee - btnW / 2;
+      let newY = btnCenterY + dy * flee - btnH / 2;
 
       // Clamp to viewport
-      const pad = 10;
-      newX = Math.max(pad, Math.min(newX, window.innerWidth - rect.width - pad));
-      newY = Math.max(pad, Math.min(newY, window.innerHeight - rect.height - pad));
+      newX = Math.max(pad, Math.min(newX, window.innerWidth - btnW - pad));
+      newY = Math.max(pad, Math.min(newY, window.innerHeight - btnH - pad));
+
+      // If clamped position is still too close to finger (cornered), teleport to opposite side
+      const newCenterX = newX + btnW / 2;
+      const newCenterY = newY + btnH / 2;
+      if (Math.hypot(newCenterX - px, newCenterY - py) < 80) {
+        newX = px < window.innerWidth / 2
+          ? window.innerWidth - btnW - pad
+          : pad;
+        newY = py < window.innerHeight / 2
+          ? window.innerHeight - btnH - pad
+          : pad;
+      }
 
       const speed = getPhase() >= 3 ? 0.1 : 0.2;
       btnNo.style.transition = `left ${speed}s ease-out, top ${speed}s ease-out`;
       btnNo.style.left = newX + 'px';
       btnNo.style.top = newY + 'px';
-    }
-
-    function spawnDecoyYes() {
-      if (decoyCount >= 5) { runAwayFast(); return; }
-      decoyCount++;
-
-      const decoy = document.createElement('button');
-      decoy.className = 'decoy-btn';
-      decoy.textContent = ['Yes! 💖', 'Yes!! 💕', 'Say Yes! 💗', 'Yes please! 🥰', 'YES! ❤️'][decoyCount - 1] || 'Yes! 💖';
-      decoy.style.left = (10 + Math.random() * (window.innerWidth - 140)) + 'px';
-      decoy.style.top = (10 + Math.random() * (window.innerHeight - 60)) + 'px';
-      decoy.addEventListener('pointerdown', function(e) {
-        e.preventDefault();
-        sayYes();
-      });
-      document.body.appendChild(decoy);
-
-      // Also move the No button
-      if (isRunaway) moveNoRandom();
     }
 
     function changeNoText() {
@@ -866,44 +923,77 @@
       setTimeout(() => btnYes.classList.remove('growing'), 400);
     }
 
-    // ─── Surrender sequence (phase 4) ───
-    function surrenderSequence() {
+    // ─── Yes flood (phase 4) ───
+    let floodStarted = false;
+
+    function startYesFlood() {
+      if (floodStarted) return;
+      floodStarted = true;
       gameOver = true;
 
       // Health drops to 0
       noHealth = 0;
       healthFill.style.width = '0%';
       healthLabel.textContent = '💀 "No" button defeated!';
+      subtitle.textContent = 'There is only one answer... 💖';
 
-      // Button transforms
-      btnNo.style.transition = 'all 0.6s ease';
-      btnNo.style.fontSize = '1.1rem';
-      btnNo.style.padding = '14px 36px';
-      btnNo.textContent = '...fine 😢💖';
+      // Hide the No button
+      btnNo.style.transition = 'all 0.5s ease';
+      btnNo.style.opacity = '0';
+      btnNo.style.pointerEvents = 'none';
+      setTimeout(() => { btnNo.style.display = 'none'; }, 500);
 
-      // If runaway, animate back towards center
-      if (isRunaway) {
-        const centerX = window.innerWidth / 2 - 60;
-        const centerY = window.innerHeight / 2 + 60;
-        btnNo.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
-        btnNo.style.left = centerX + 'px';
-        btnNo.style.top = centerY + 'px';
+      // Create the flood overlay
+      const flood = document.createElement('div');
+      flood.className = 'yes-flood';
+      flood.id = 'yesFlood';
+      document.body.appendChild(flood);
+
+      // Calculate how many buttons we need to fill the screen
+      const isMobile = window.innerWidth <= 480;
+      const btnMinW = isMobile ? 90 : 110;
+      const gap = isMobile ? 5 : 6;
+      const pad = isMobile ? 6 : 8;
+      const cols = Math.floor((window.innerWidth - pad * 2 + gap) / (btnMinW + gap));
+      const btnH = isMobile ? 38 : 42;
+      const rows = Math.ceil((window.innerHeight - pad * 2 + gap) / (btnH + gap)) + 2;
+      const totalButtons = cols * rows;
+
+      const yesTexts = [
+        'Yes! 💖', 'Yes!! 💕', 'Say Yes! 💗', 'Yes please! 🥰', 'YES! ❤️',
+        'Yep! 💘', 'Absolutely! 💝', 'Of course! 🌹', 'Yes yes yes! 💖',
+        'Duh! 🥰', '100%! ❤️', 'Obviously! 💗', 'Yes!!! 💕', 'Yesss 💖',
+        'Yes 🩷', 'Si! 💘', 'Da! 💖', 'Oui! 💕', 'Ja! ❤️', 'YES 💝',
+      ];
+
+      // Spawn buttons one by one with staggered delays
+      const baseDelay = 60;  // ms between each button
+      for (let i = 0; i < totalButtons; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'yes-flood-btn';
+        btn.textContent = yesTexts[i % yesTexts.length];
+        btn.addEventListener('pointerdown', function(e) {
+          e.preventDefault();
+          sayYes();
+        });
+        flood.appendChild(btn);
+
+        // Stagger the reveal — they pop in one by one
+        setTimeout(() => {
+          btn.classList.add('visible');
+        }, i * baseDelay);
       }
 
-      // After a beat, transform into Yes
+      // After all buttons visible, make flood active (clickable) and
+      // also catch any click on the overlay gaps
+      const totalTime = totalButtons * baseDelay + 300;
       setTimeout(() => {
-        btnNo.style.background = 'var(--red)';
-        btnNo.style.color = 'var(--white)';
-        btnNo.style.borderColor = 'var(--red)';
-        btnNo.style.boxShadow = '0 4px 16px rgba(230, 57, 70, 0.35)';
-        btnNo.textContent = 'Ok... Yes! 💖';
-        playAnim(btnNo, 'jelly', 500);
-      }, 900);
-
-      // Trigger celebration
-      setTimeout(() => {
-        sayYes();
-      }, 2200);
+        flood.classList.add('active');
+        flood.addEventListener('pointerdown', function(e) {
+          e.preventDefault();
+          sayYes();
+        });
+      }, 800); // Make clickable pretty quickly so she doesn't have to wait
     }
 
     // ─── Utility ───
