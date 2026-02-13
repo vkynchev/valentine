@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Will You Be My Valentine?</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap');
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --red: #e63946;
+      --pink: #ff6b8a;
+      --light-pink: #fff0f3;
+      --white: #ffffff;
+      --dark-pink: #c2185b;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, var(--light-pink) 0%, #ffd6e0 50%, var(--light-pink) 100%);
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Floating background hearts ── */
+    .bg-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .bg-heart {
+      position: absolute;
+      font-size: 1.4rem;
+      opacity: 0.15;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(110vh) rotate(0deg) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.15;
+      }
+      90% {
+        opacity: 0.15;
+      }
+      100% {
+        transform: translateY(-10vh) rotate(360deg) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    /* ── Main card ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--white);
+      border-radius: 24px;
+      padding: 48px 36px 40px;
+      text-align: center;
+      max-width: 420px;
+      width: 90vw;
+      box-shadow:
+        0 8px 40px rgba(230, 57, 70, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06);
+      animation: cardEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @keyframes cardEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .decor-top {
+      font-size: 2.4rem;
+      margin-bottom: 8px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .card h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 1.9rem;
+      color: var(--red);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .card .sub {
+      font-size: 1rem;
+      color: var(--pink);
+      font-weight: 600;
+      margin-bottom: 32px;
+    }
+
+    .bear {
+      font-size: 4rem;
+      display: block;
+      margin-bottom: 12px;
+      animation: wiggle 3s ease-in-out infinite;
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-6deg); }
+      75% { transform: rotate(6deg); }
+    }
+
+    /* ── Buttons container ── */
+    .buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      min-height: 60px;
+      position: relative;
+    }
+
+    .btn {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 14px 36px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      position: relative;
+    }
+
+    .btn-yes {
+      background: var(--red);
+      color: var(--white);
+      border: 3px solid var(--red);
+      box-shadow: 0 4px 16px rgba(230, 57, 70, 0.35);
+    }
+
+    .btn-yes:hover {
+      background: var(--dark-pink);
+      border-color: var(--dark-pink);
+      transform: scale(1.08);
+      box-shadow: 0 6px 24px rgba(230, 57, 70, 0.45);
+    }
+
+    .btn-yes:active {
+      transform: scale(0.97);
+    }
+
+    .btn-no {
+      background: transparent;
+      color: var(--red);
+      border: 3px solid var(--red);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-no:hover {
+      background: rgba(230, 57, 70, 0.06);
+    }
+
+    .btn-no.runaway {
+      position: fixed;
+      z-index: 10;
+    }
+
+    .btn-no.spin {
+      animation: spinAway 0.6s ease-in-out;
+    }
+
+    @keyframes spinAway {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(540deg) scale(0.5); }
+      100% { transform: rotate(1080deg) scale(1); }
+    }
+
+    .btn-no.shrink {
+      animation: shrinkAway 0.8s ease-in forwards;
+    }
+
+    @keyframes shrinkAway {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+
+    .btn-no.fade {
+      animation: fadeAway 0.6s ease-in forwards;
+    }
+
+    @keyframes fadeAway {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .btn-no.jelly {
+      animation: jelly 0.5s ease-in-out;
+    }
+
+    @keyframes jelly {
+      0% { transform: scale(1, 1); }
+      20% { transform: scale(1.25, 0.75); }
+      40% { transform: scale(0.75, 1.25); }
+      60% { transform: scale(1.15, 0.85); }
+      80% { transform: scale(0.95, 1.05); }
+      100% { transform: scale(1, 1); }
+    }
+
+    /* ── Growing Yes button ── */
+    .btn-yes.growing {
+      animation: growPulse 0.4s ease-out;
+    }
+
+    @keyframes growPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* ── Celebration overlay ── */
+    .celebration {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 240, 243, 0.92);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    .celebration.active {
+      display: flex;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    .celebration canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .celebration-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      animation: celebrationEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
+    }
+
+    @keyframes celebrationEntrance {
+      0% {
+        opacity: 0;
+        transform: scale(0.3) translateY(40px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .celebration-content .big-heart {
+      font-size: 5rem;
+      display: block;
+      margin-bottom: 12px;
+      animation: heartBeat 1s ease-in-out infinite;
+    }
+
+    @keyframes heartBeat {
+      0%, 100% { transform: scale(1); }
+      15% { transform: scale(1.3); }
+      30% { transform: scale(1); }
+      45% { transform: scale(1.2); }
+      60% { transform: scale(1); }
+    }
+
+    .celebration-content h1 {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.6rem;
+      color: var(--red);
+      margin-bottom: 8px;
+      text-shadow: 0 2px 12px rgba(230, 57, 70, 0.2);
+    }
+
+    .celebration-content p {
+      font-size: 1.2rem;
+      color: var(--pink);
+      font-weight: 700;
+    }
+
+    .floating-hearts {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .floating-hearts span {
+      position: absolute;
+      bottom: -10%;
+      animation: floatCelebrate linear forwards;
+    }
+
+    @keyframes floatCelebrate {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-110vh) rotate(720deg) scale(0.3);
+        opacity: 0;
+      }
+    }
+
+    /* ── Mobile tweaks ── */
+    @media (max-width: 480px) {
+      .card {
+        padding: 36px 24px 32px;
+        border-radius: 20px;
+      }
+
+      .card h1 {
+        font-size: 1.55rem;
+      }
+
+      .bear {
+        font-size: 3.2rem;
+      }
+
+      .btn {
+        padding: 12px 28px;
+        font-size: 1rem;
+      }
+
+      .celebration-content h1 {
+        font-size: 2rem;
+      }
+
+      .celebration-content .big-heart {
+        font-size: 4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background floating hearts -->
+  <div class="bg-hearts" id="bgHearts"></div>
+
+  <!-- Main card -->
+  <div class="card" id="card">
+    <span class="bear">🧸💕</span>
+    <div class="decor-top">💌</div>
+    <h1>Will You Be My Valentine?</h1>
+    <p class="sub">Pretty please? 🥺</p>
+    <div class="buttons" id="buttons">
+      <button class="btn btn-yes" id="btnYes" onclick="sayYes()">Yes! 💖</button>
+      <button class="btn btn-no" id="btnNo">No 😢</button>
+    </div>
+  </div>
+
+  <!-- Celebration overlay -->
+  <div class="celebration" id="celebration">
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="floating-hearts" id="celebrationHearts"></div>
+    <div class="celebration-content">
+      <span class="big-heart">💖</span>
+      <h1>Yayyy! 🎉</h1>
+      <p>I knew you'd say yes! 🥰</p>
+    </div>
+  </div>
+
+  <script>
+    // ─── Background Hearts ───
+    (function createBgHearts() {
+      const container = document.getElementById('bgHearts');
+      const hearts = ['💕', '💗', '💖', '❤️', '🩷', '💘', '🌸'];
+      for (let i = 0; i < 15; i++) {
+        const span = document.createElement('span');
+        span.classList.add('bg-heart');
+        span.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        span.style.left = Math.random() * 100 + '%';
+        span.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
+        span.style.animationDuration = (8 + Math.random() * 12) + 's';
+        span.style.animationDelay = (Math.random() * 10) + 's';
+        container.appendChild(span);
+      }
+    })();
+
+    // ─── State ───
+    const btnYes = document.getElementById('btnYes');
+    const btnNo = document.getElementById('btnNo');
+    const buttonsContainer = document.getElementById('buttons');
+    let noClickCount = 0;
+    let isRunaway = false;
+
+    const pleadingTexts = [
+      "No 😢", "Are you sure? 🥺", "Really? 😭", "Pretty please? 💔",
+      "Think again! 😿", "Don't do this 😩", "I'll be sad 🥹",
+      "Reconsider? 💕", "Please? 🙏", "Last chance! ❤️‍🩹"
+    ];
+
+    // ─── Tricks ───
+    // Each trick is a function that does something to the No button
+    const tricks = [
+      swapButtons,
+      runAway,
+      becomeYes,
+      shrinkNo,
+      changeText,
+      spinNo,
+      fadeNo,
+      jellyNo,
+      growYes,
+      duplicateYes,
+    ];
+
+    // Keep track of recent tricks so we don't repeat
+    let recentTricks = [];
+
+    function pickTrick() {
+      const available = tricks.filter(t => !recentTricks.includes(t));
+      const pool = available.length > 0 ? available : tricks;
+      const trick = pool[Math.floor(Math.random() * pool.length)];
+      recentTricks.push(trick);
+      if (recentTricks.length > 4) recentTricks.shift();
+      return trick;
+    }
+
+    // Attach listener
+    btnNo.addEventListener('pointerdown', function(e) {
+      e.preventDefault();
+      noClickCount++;
+      pickTrick()();
+    });
+
+    // Also handle hover on desktop to make it run away sometimes
+    let hoverCount = 0;
+    btnNo.addEventListener('pointerenter', function() {
+      hoverCount++;
+      // After a few clicks, start running away on hover too
+      if (noClickCount >= 2 && hoverCount % 2 === 0 && !isRunaway) {
+        runAway();
+      }
+    });
+
+    // ─── Trick implementations ───
+
+    function swapButtons() {
+      const parent = btnNo.parentNode;
+      if (!isRunaway && parent === buttonsContainer) {
+        // Swap by re-inserting
+        if (btnYes.nextSibling === btnNo) {
+          parent.insertBefore(btnNo, btnYes);
+        } else {
+          parent.insertBefore(btnYes, btnNo);
+        }
+        btnNo.classList.add('jelly');
+        setTimeout(() => btnNo.classList.remove('jelly'), 500);
+      } else {
+        changeText();
+      }
+    }
+
+    function runAway() {
+      if (isRunaway) {
+        // Already floating - just move
+        moveNoRandom();
+        return;
+      }
+      isRunaway = true;
+      const rect = btnNo.getBoundingClientRect();
+      btnNo.style.left = rect.left + 'px';
+      btnNo.style.top = rect.top + 'px';
+      btnNo.classList.add('runaway');
+      document.body.appendChild(btnNo);
+      moveNoRandom();
+    }
+
+    function moveNoRandom() {
+      const maxX = window.innerWidth - btnNo.offsetWidth - 16;
+      const maxY = window.innerHeight - btnNo.offsetHeight - 16;
+      const newX = 16 + Math.random() * maxX;
+      const newY = 16 + Math.random() * maxY;
+      btnNo.style.transition = 'left 0.3s ease-out, top 0.3s ease-out';
+      btnNo.style.left = newX + 'px';
+      btnNo.style.top = newY + 'px';
+    }
+
+    function becomeYes() {
+      btnNo.textContent = 'Yes! 💖';
+      btnNo.classList.remove('btn-no');
+      btnNo.classList.add('btn-yes');
+      btnNo.style.background = 'var(--red)';
+      btnNo.style.color = 'var(--white)';
+      btnNo.style.borderColor = 'var(--red)';
+      btnNo.onclick = sayYes;
+      // Remove the pointerdown listener doesn't work since it's anonymous,
+      // but the onclick will fire sayYes
+      setTimeout(sayYes, 800);
+    }
+
+    function shrinkNo() {
+      btnNo.classList.add('shrink');
+      setTimeout(() => {
+        btnNo.classList.remove('shrink');
+        btnNo.style.transform = '';
+        btnNo.style.opacity = '';
+        // Grow yes button to fill space
+        growYes();
+      }, 900);
+    }
+
+    function changeText() {
+      const idx = Math.min(noClickCount, pleadingTexts.length - 1);
+      btnNo.textContent = pleadingTexts[idx];
+      btnNo.classList.add('jelly');
+      setTimeout(() => btnNo.classList.remove('jelly'), 500);
+    }
+
+    function spinNo() {
+      btnNo.classList.add('spin');
+      setTimeout(() => {
+        btnNo.classList.remove('spin');
+        changeText();
+      }, 650);
+    }
+
+    function fadeNo() {
+      btnNo.classList.add('fade');
+      setTimeout(() => {
+        btnNo.classList.remove('fade');
+        btnNo.style.opacity = '';
+        changeText();
+      }, 700);
+    }
+
+    function jellyNo() {
+      btnNo.classList.add('jelly');
+      changeText();
+      setTimeout(() => btnNo.classList.remove('jelly'), 500);
+    }
+
+    function growYes() {
+      btnYes.classList.add('growing');
+      // Make Yes button bigger each time
+      const current = parseFloat(getComputedStyle(btnYes).fontSize);
+      btnYes.style.fontSize = Math.min(current * 1.12, 32) + 'px';
+      btnYes.style.padding = '16px 44px';
+      setTimeout(() => btnYes.classList.remove('growing'), 400);
+    }
+
+    function duplicateYes() {
+      // Add another Yes button
+      const clone = btnYes.cloneNode(true);
+      clone.onclick = sayYes;
+      clone.style.animation = 'cardEntrance 0.5s cubic-bezier(0.34,1.56,0.64,1) both';
+      buttonsContainer.appendChild(clone);
+    }
+
+    // ─── Celebration ───
+
+    function sayYes() {
+      document.getElementById('celebration').classList.add('active');
+      startFireworks();
+      spawnCelebrationHearts();
+    }
+
+    // ─── Fireworks (Canvas) ───
+
+    function startFireworks() {
+      const canvas = document.getElementById('fireworksCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H;
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      const particles = [];
+      const colors = ['#e63946', '#ff6b8a', '#ff9ebc', '#ffffff', '#ffd6e0', '#c2185b', '#ff4081'];
+
+      class Particle {
+        constructor(x, y, color, vel, life) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.vx = vel.x;
+          this.vy = vel.y;
+          this.alpha = 1;
+          this.life = life || 60 + Math.random() * 30;
+          this.maxLife = this.life;
+          this.size = 2 + Math.random() * 2;
+          this.gravity = 0.02;
+          this.friction = 0.98;
+        }
+        update() {
+          this.vx *= this.friction;
+          this.vy *= this.friction;
+          this.vy += this.gravity;
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life--;
+          this.alpha = this.life / this.maxLife;
+        }
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+
+          // Draw tiny hearts instead of circles sometimes
+          if (Math.random() > 0.5) {
+            drawHeart(ctx, this.x, this.y, this.size);
+          } else {
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+
+      function drawHeart(ctx, x, y, size) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + size / 4);
+        ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + size / 4);
+        ctx.bezierCurveTo(x - size / 2, y + size / 2, x, y + size * 0.75, x, y + size);
+        ctx.bezierCurveTo(x, y + size * 0.75, x + size / 2, y + size / 2, x + size / 2, y + size / 4);
+        ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + size / 4);
+        ctx.fill();
+      }
+
+      function explode(x, y) {
+        const count = 50 + Math.floor(Math.random() * 30);
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        for (let i = 0; i < count; i++) {
+          const angle = (Math.PI * 2 / count) * i + Math.random() * 0.2;
+          const speed = 1.5 + Math.random() * 3;
+          particles.push(new Particle(x, y, color, {
+            x: Math.cos(angle) * speed,
+            y: Math.sin(angle) * speed
+          }));
+        }
+      }
+
+      let frame = 0;
+      function animate() {
+        ctx.fillStyle = 'rgba(255, 240, 243, 0.15)';
+        ctx.fillRect(0, 0, W, H);
+
+        // Spawn new fireworks periodically
+        if (frame % 35 === 0) {
+          explode(
+            W * 0.15 + Math.random() * W * 0.7,
+            H * 0.1 + Math.random() * H * 0.4
+          );
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          particles[i].update();
+          particles[i].draw();
+          if (particles[i].life <= 0) {
+            particles.splice(i, 1);
+          }
+        }
+
+        frame++;
+        requestAnimationFrame(animate);
+      }
+
+      // Initial burst
+      explode(W * 0.5, H * 0.3);
+      setTimeout(() => explode(W * 0.3, H * 0.25), 200);
+      setTimeout(() => explode(W * 0.7, H * 0.2), 400);
+      animate();
+    }
+
+    // ─── Celebration Floating Hearts ───
+
+    function spawnCelebrationHearts() {
+      const container = document.getElementById('celebrationHearts');
+      const emojis = ['💖', '💕', '💗', '❤️', '🩷', '💘', '🥰', '💝', '✨', '🌹'];
+
+      function spawn() {
+        const span = document.createElement('span');
+        span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        span.style.left = Math.random() * 100 + '%';
+        span.style.fontSize = (1.2 + Math.random() * 2) + 'rem';
+        span.style.animationDuration = (2 + Math.random() * 3) + 's';
+        container.appendChild(span);
+        setTimeout(() => span.remove(), 5000);
+      }
+
+      // Initial burst
+      for (let i = 0; i < 20; i++) {
+        setTimeout(spawn, i * 80);
+      }
+      // Continuous
+      setInterval(spawn, 250);
+    }
+  </script>
+</body>
+</html>
