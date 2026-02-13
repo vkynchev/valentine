@@ -737,12 +737,16 @@
       if (isRunaway) { jellyNo(); return; }
       const parent = btnNo.parentNode;
       if (parent === buttonsContainer) {
-        if (btnYes.nextSibling === btnNo) {
-          parent.insertBefore(btnNo, btnYes);
-        } else {
-          parent.insertBefore(btnYes, btnNo);
-        }
-        playAnim(btnNo, 'jelly', 500);
+        // Defer swap so the current click event cycle completes first,
+        // preventing the Yes button from receiving the pointerup/click
+        setTimeout(() => {
+          if (btnYes.nextSibling === btnNo) {
+            parent.insertBefore(btnNo, btnYes);
+          } else {
+            parent.insertBefore(btnYes, btnNo);
+          }
+          playAnim(btnNo, 'jelly', 500);
+        }, 50);
       }
     }
 
