@@ -32,6 +32,7 @@
       justify-content: center;
       overflow: hidden;
       position: relative;
+      touch-action: manipulation;
     }
 
     /* ── Floating background hearts ── */
@@ -118,6 +119,7 @@
       color: var(--pink);
       font-weight: 600;
       margin-bottom: 32px;
+      transition: all 0.3s ease;
     }
 
     .bear {
@@ -125,6 +127,7 @@
       display: block;
       margin-bottom: 12px;
       animation: wiggle 3s ease-in-out infinite;
+      transition: all 0.3s ease;
     }
 
     @keyframes wiggle {
@@ -156,12 +159,12 @@
       -webkit-tap-highlight-color: transparent;
       user-select: none;
       position: relative;
+      border: 3px solid var(--red);
     }
 
     .btn-yes {
       background: var(--red);
       color: var(--white);
-      border: 3px solid var(--red);
       box-shadow: 0 4px 16px rgba(230, 57, 70, 0.35);
     }
 
@@ -179,7 +182,6 @@
     .btn-no {
       background: transparent;
       color: var(--red);
-      border: 3px solid var(--red);
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -203,21 +205,13 @@
     }
 
     .btn-no.shrink {
-      animation: shrinkAway 0.8s ease-in forwards;
+      animation: shrinkBounce 0.8s ease-in-out;
     }
 
-    @keyframes shrinkAway {
-      0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(0); opacity: 0; }
-    }
-
-    .btn-no.fade {
-      animation: fadeAway 0.6s ease-in forwards;
-    }
-
-    @keyframes fadeAway {
-      0% { opacity: 1; }
-      100% { opacity: 0; }
+    @keyframes shrinkBounce {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.3); }
+      100% { transform: scale(1); }
     }
 
     .btn-no.jelly {
@@ -233,6 +227,52 @@
       100% { transform: scale(1, 1); }
     }
 
+    .btn-no.shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-12px) rotate(-5deg); }
+      40% { transform: translateX(12px) rotate(5deg); }
+      60% { transform: translateX(-8px) rotate(-3deg); }
+      80% { transform: translateX(8px) rotate(3deg); }
+    }
+
+    .btn-no.flip {
+      animation: flip 0.6s ease-in-out;
+    }
+
+    @keyframes flip {
+      0% { transform: perspective(400px) rotateY(0); }
+      50% { transform: perspective(400px) rotateY(180deg) scale(0.8); }
+      100% { transform: perspective(400px) rotateY(360deg) scale(1); }
+    }
+
+    .btn-no.bounce-away {
+      animation: bounceAway 0.5s ease-in-out;
+    }
+
+    @keyframes bounceAway {
+      0% { transform: translateY(0); }
+      30% { transform: translateY(-40px); }
+      50% { transform: translateY(10px); }
+      70% { transform: translateY(-15px); }
+      100% { transform: translateY(0); }
+    }
+
+    .btn-no.dizzy {
+      animation: dizzy 0.8s ease-in-out;
+    }
+
+    @keyframes dizzy {
+      0% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(15deg) scale(0.9); }
+      50% { transform: rotate(-15deg) scale(1.1); }
+      75% { transform: rotate(10deg) scale(0.95); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
     /* ── Growing Yes button ── */
     .btn-yes.growing {
       animation: growPulse 0.4s ease-out;
@@ -242,6 +282,39 @@
       0% { transform: scale(1); }
       50% { transform: scale(1.15); }
       100% { transform: scale(1); }
+    }
+
+    /* ── Health bar ── */
+    .health-bar-wrap {
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .health-bar-wrap.visible {
+      opacity: 1;
+    }
+
+    .health-label {
+      font-size: 0.75rem;
+      color: var(--pink);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .health-bar {
+      height: 8px;
+      background: #fce4ec;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .health-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--red), var(--pink));
+      border-radius: 4px;
+      transition: width 0.4s ease-out;
+      width: 100%;
     }
 
     /* ── Celebration overlay ── */
@@ -348,6 +421,25 @@
       }
     }
 
+    /* ── Decoy buttons ── */
+    .decoy-btn {
+      position: fixed;
+      z-index: 9;
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      padding: 14px 36px;
+      border-radius: 50px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      background: var(--red);
+      color: var(--white);
+      border: 3px solid var(--red);
+      box-shadow: 0 4px 16px rgba(230, 57, 70, 0.35);
+      animation: cardEntrance 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
     /* ── Mobile tweaks ── */
     @media (max-width: 480px) {
       .card {
@@ -385,13 +477,19 @@
 
   <!-- Main card -->
   <div class="card" id="card">
-    <span class="bear">🧸💕</span>
+    <span class="bear" id="bear">🧸💕</span>
     <div class="decor-top">💌</div>
-    <h1>Will You Be My Valentine?</h1>
-    <p class="sub">Pretty please? 🥺</p>
+    <h1 id="title">Will You Be My Valentine?</h1>
+    <p class="sub" id="subtitle">Pretty please? 🥺</p>
     <div class="buttons" id="buttons">
       <button class="btn btn-yes" id="btnYes" onclick="sayYes()">Yes! 💖</button>
       <button class="btn btn-no" id="btnNo">No 😢</button>
+    </div>
+    <div class="health-bar-wrap" id="healthWrap">
+      <div class="health-label" id="healthLabel">❤️ "No" button resistance</div>
+      <div class="health-bar">
+        <div class="health-fill" id="healthFill"></div>
+      </div>
     </div>
   </div>
 
@@ -423,59 +521,154 @@
       }
     })();
 
-    // ─── State ───
+    // ─── Elements ───
     const btnYes = document.getElementById('btnYes');
     const btnNo = document.getElementById('btnNo');
     const buttonsContainer = document.getElementById('buttons');
-    let noClickCount = 0;
+    const bear = document.getElementById('bear');
+    const subtitle = document.getElementById('subtitle');
+    const healthWrap = document.getElementById('healthWrap');
+    const healthFill = document.getElementById('healthFill');
+    const healthLabel = document.getElementById('healthLabel');
+
+    // ─── State ───
+    let tapCount = 0;
     let isRunaway = false;
+    let gameStartTime = null;
+    let gameOver = false;
+    let noHealth = 100;
+    let yesGrowthLevel = 0;
+    let decoyCount = 0;
 
-    const pleadingTexts = [
-      "No 😢", "Are you sure? 🥺", "Really? 😭", "Pretty please? 💔",
-      "Think again! 😿", "Don't do this 😩", "I'll be sad 🥹",
-      "Reconsider? 💕", "Please? 🙏", "Last chance! ❤️‍🩹"
+    // ─── Phased messages: subtitle reacts to taps ───
+    const subtitleMessages = [
+      "Pretty please? 🥺",
+      "Are you sure?? 🥺",
+      "Think about it... 💭",
+      "But whyyyy 😭",
+      "I made this for you! 💔",
+      "You're breaking my heart 😩",
+      "I'll be so sad... 🥹",
+      "Please reconsider! 🙏",
+      "I won't give up! 💪",
+      "Almost... just say yes! 😤",
+      "The button is dying... 💀",
+      "You monster! 😈💕",
+      "PLEASE 🥺🥺🥺",
+      "I'm literally begging 🧎",
+      "Ok fine... jk SAY YES 😂",
     ];
 
-    // ─── Tricks ───
-    // Each trick is a function that does something to the No button
-    const tricks = [
-      swapButtons,
-      runAway,
-      becomeYes,
-      shrinkNo,
-      changeText,
-      spinNo,
-      fadeNo,
-      jellyNo,
-      growYes,
-      duplicateYes,
+    const bearMoods = [
+      "🧸💕", "🧸😢", "🧸😭", "🧸💔", "🧸😩",
+      "🧸🥺", "🧸😤", "🧸😵‍💫", "🧸🫠", "🧸💀",
     ];
 
-    // Keep track of recent tricks so we don't repeat
+    const noButtonTexts = [
+      "No 😢",
+      "Are you sure? 🥺",
+      "Really?? 😭",
+      "Pretty please? 💔",
+      "Think again! 😿",
+      "Don't do this 😩",
+      "I'll be sad 🥹",
+      "Reconsider? 💕",
+      "Nooo stop 😤",
+      "Giving up... 😵‍💫",
+      "Can't... hold... 🫠",
+      "So weak... 💀",
+      "*cracks* 🥺",
+      "...fine 😢💖",
+    ];
+
+    // ─── Phase logic ───
+    // Phase 1 (taps 1-4): Playful — swap, jelly, text change, shake
+    // Phase 2 (taps 5-9): Evasive — run away, dodge, shrink, spin
+    // Phase 3 (taps 10-14): Chaotic — fast moves, flip, clone Yes buttons, tiny
+    // Phase 4 (taps 15+): Surrender — button crumbles, gives up
+
+    function getPhase() {
+      if (tapCount <= 4) return 1;
+      if (tapCount <= 9) return 2;
+      if (tapCount <= 14) return 3;
+      return 4;
+    }
+
+    // Phase-specific trick pools
+    const phase1Tricks = [swapButtons, jellyNo, changeNoText, shakeNo, bounceNo];
+    const phase2Tricks = [runAway, spinNo, shrinkNo, changeNoText, shakeNo, dizzyNo];
+    const phase3Tricks = [runAwayFast, flipNo, spawnDecoyYes, shrinkSmaller, spinNo, dizzyNo];
+
     let recentTricks = [];
 
-    function pickTrick() {
-      const available = tricks.filter(t => !recentTricks.includes(t));
-      const pool = available.length > 0 ? available : tricks;
-      const trick = pool[Math.floor(Math.random() * pool.length)];
+    function pickTrick(pool) {
+      const available = pool.filter(t => !recentTricks.includes(t));
+      const list = available.length > 0 ? available : pool;
+      const trick = list[Math.floor(Math.random() * list.length)];
       recentTricks.push(trick);
-      if (recentTricks.length > 4) recentTricks.shift();
+      if (recentTricks.length > 3) recentTricks.shift();
       return trick;
     }
 
-    // Attach listener
+    // ─── Main tap handler ───
     btnNo.addEventListener('pointerdown', function(e) {
       e.preventDefault();
-      noClickCount++;
-      pickTrick()();
+      if (gameOver) return;
+
+      if (!gameStartTime) gameStartTime = Date.now();
+      tapCount++;
+
+      // Update UI feedback
+      updateSubtitle();
+      updateBear();
+      updateHealth();
+
+      const phase = getPhase();
+
+      if (phase === 1) {
+        pickTrick(phase1Tricks)();
+      } else if (phase === 2) {
+        pickTrick(phase2Tricks)();
+        growYesButton();
+      } else if (phase === 3) {
+        pickTrick(phase3Tricks)();
+        growYesButton();
+      } else {
+        // Phase 4: surrender sequence
+        surrenderSequence();
+      }
     });
 
-    // Also handle hover on desktop to make it run away sometimes
-    let hoverCount = 0;
+    // ─── Touch proximity dodging (mobile) ───
+    // When the button is in runaway mode, dodge the finger
+    let lastTouchX = null;
+    let lastTouchY = null;
+
+    document.addEventListener('touchmove', function(e) {
+      if (!isRunaway || gameOver) return;
+      const touch = e.touches[0];
+      lastTouchX = touch.clientX;
+      lastTouchY = touch.clientY;
+
+      const rect = btnNo.getBoundingClientRect();
+      const btnCenterX = rect.left + rect.width / 2;
+      const btnCenterY = rect.top + rect.height / 2;
+      const dist = Math.hypot(lastTouchX - btnCenterX, lastTouchY - btnCenterY);
+
+      // If finger gets within 90px, dodge!
+      if (dist < 90) {
+        dodgeFromPoint(lastTouchX, lastTouchY);
+      }
+    }, { passive: true });
+
+    // Also dodge on desktop hover
+    let hoverDodgeCount = 0;
     btnNo.addEventListener('pointerenter', function() {
-      hoverCount++;
-      // After a few clicks, start running away on hover too
-      if (noClickCount >= 2 && hoverCount % 2 === 0 && !isRunaway) {
+      if (gameOver) return;
+      hoverDodgeCount++;
+      if (isRunaway && hoverDodgeCount >= 1) {
+        moveNoRandom();
+      } else if (tapCount >= 3 && !isRunaway) {
         runAway();
       }
     });
@@ -483,24 +676,63 @@
     // ─── Trick implementations ───
 
     function swapButtons() {
+      if (isRunaway) { jellyNo(); return; }
       const parent = btnNo.parentNode;
-      if (!isRunaway && parent === buttonsContainer) {
-        // Swap by re-inserting
+      if (parent === buttonsContainer) {
         if (btnYes.nextSibling === btnNo) {
           parent.insertBefore(btnNo, btnYes);
         } else {
           parent.insertBefore(btnYes, btnNo);
         }
-        btnNo.classList.add('jelly');
-        setTimeout(() => btnNo.classList.remove('jelly'), 500);
-      } else {
-        changeText();
+        playAnim(btnNo, 'jelly', 500);
       }
+    }
+
+    function jellyNo() {
+      playAnim(btnNo, 'jelly', 500);
+    }
+
+    function shakeNo() {
+      playAnim(btnNo, 'shake', 400);
+    }
+
+    function bounceNo() {
+      playAnim(btnNo, 'bounce-away', 500);
+    }
+
+    function spinNo() {
+      playAnim(btnNo, 'spin', 650);
+      changeNoText();
+    }
+
+    function dizzyNo() {
+      playAnim(btnNo, 'dizzy', 800);
+      changeNoText();
+    }
+
+    function flipNo() {
+      playAnim(btnNo, 'flip', 600);
+      changeNoText();
+    }
+
+    function shrinkNo() {
+      playAnim(btnNo, 'shrink', 800);
+    }
+
+    function shrinkSmaller() {
+      // Actually make the button smaller permanently
+      const current = parseFloat(getComputedStyle(btnNo).fontSize);
+      const newSize = Math.max(current * 0.82, 9);
+      btnNo.style.fontSize = newSize + 'px';
+      const currentPad = parseFloat(getComputedStyle(btnNo).paddingLeft);
+      const newPad = Math.max(currentPad * 0.85, 8);
+      btnNo.style.padding = `${newPad * 0.7}px ${newPad}px`;
+      playAnim(btnNo, 'shrink', 800);
+      changeNoText();
     }
 
     function runAway() {
       if (isRunaway) {
-        // Already floating - just move
         moveNoRandom();
         return;
       }
@@ -513,90 +745,179 @@
       moveNoRandom();
     }
 
+    function runAwayFast() {
+      if (!isRunaway) runAway();
+      // Quick successive moves
+      moveNoRandom();
+      setTimeout(moveNoRandom, 200);
+      setTimeout(moveNoRandom, 400);
+    }
+
     function moveNoRandom() {
-      const maxX = window.innerWidth - btnNo.offsetWidth - 16;
-      const maxY = window.innerHeight - btnNo.offsetHeight - 16;
-      const newX = 16 + Math.random() * maxX;
-      const newY = 16 + Math.random() * maxY;
-      btnNo.style.transition = 'left 0.3s ease-out, top 0.3s ease-out';
+      const pad = 16;
+      const maxX = window.innerWidth - btnNo.offsetWidth - pad;
+      const maxY = window.innerHeight - btnNo.offsetHeight - pad;
+      const newX = pad + Math.random() * maxX;
+      const newY = pad + Math.random() * maxY;
+
+      // Speed depends on phase
+      const phase = getPhase();
+      const speed = phase >= 3 ? 0.15 : 0.3;
+
+      btnNo.style.transition = `left ${speed}s ease-out, top ${speed}s ease-out`;
       btnNo.style.left = newX + 'px';
       btnNo.style.top = newY + 'px';
     }
 
-    function becomeYes() {
-      btnNo.textContent = 'Yes! 💖';
-      btnNo.classList.remove('btn-no');
-      btnNo.classList.add('btn-yes');
-      btnNo.style.background = 'var(--red)';
-      btnNo.style.color = 'var(--white)';
-      btnNo.style.borderColor = 'var(--red)';
-      btnNo.onclick = sayYes;
-      // Remove the pointerdown listener doesn't work since it's anonymous,
-      // but the onclick will fire sayYes
-      setTimeout(sayYes, 800);
+    function dodgeFromPoint(px, py) {
+      const rect = btnNo.getBoundingClientRect();
+      const btnCenterX = rect.left + rect.width / 2;
+      const btnCenterY = rect.top + rect.height / 2;
+
+      // Move away from the point
+      let dx = btnCenterX - px;
+      let dy = btnCenterY - py;
+      const dist = Math.hypot(dx, dy) || 1;
+      dx /= dist;
+      dy /= dist;
+
+      const flee = 120 + Math.random() * 80;
+      let newX = btnCenterX + dx * flee - rect.width / 2;
+      let newY = btnCenterY + dy * flee - rect.height / 2;
+
+      // Clamp to viewport
+      const pad = 10;
+      newX = Math.max(pad, Math.min(newX, window.innerWidth - rect.width - pad));
+      newY = Math.max(pad, Math.min(newY, window.innerHeight - rect.height - pad));
+
+      const speed = getPhase() >= 3 ? 0.1 : 0.2;
+      btnNo.style.transition = `left ${speed}s ease-out, top ${speed}s ease-out`;
+      btnNo.style.left = newX + 'px';
+      btnNo.style.top = newY + 'px';
     }
 
-    function shrinkNo() {
-      btnNo.classList.add('shrink');
-      setTimeout(() => {
-        btnNo.classList.remove('shrink');
-        btnNo.style.transform = '';
-        btnNo.style.opacity = '';
-        // Grow yes button to fill space
-        growYes();
-      }, 900);
+    function spawnDecoyYes() {
+      if (decoyCount >= 5) { runAwayFast(); return; }
+      decoyCount++;
+
+      const decoy = document.createElement('button');
+      decoy.className = 'decoy-btn';
+      decoy.textContent = ['Yes! 💖', 'Yes!! 💕', 'Say Yes! 💗', 'Yes please! 🥰', 'YES! ❤️'][decoyCount - 1] || 'Yes! 💖';
+      decoy.style.left = (10 + Math.random() * (window.innerWidth - 140)) + 'px';
+      decoy.style.top = (10 + Math.random() * (window.innerHeight - 60)) + 'px';
+      decoy.addEventListener('pointerdown', function(e) {
+        e.preventDefault();
+        sayYes();
+      });
+      document.body.appendChild(decoy);
+
+      // Also move the No button
+      if (isRunaway) moveNoRandom();
     }
 
-    function changeText() {
-      const idx = Math.min(noClickCount, pleadingTexts.length - 1);
-      btnNo.textContent = pleadingTexts[idx];
-      btnNo.classList.add('jelly');
-      setTimeout(() => btnNo.classList.remove('jelly'), 500);
+    function changeNoText() {
+      const idx = Math.min(tapCount, noButtonTexts.length - 1);
+      btnNo.textContent = noButtonTexts[idx];
     }
 
-    function spinNo() {
-      btnNo.classList.add('spin');
-      setTimeout(() => {
-        btnNo.classList.remove('spin');
-        changeText();
-      }, 650);
+    function updateSubtitle() {
+      const idx = Math.min(tapCount - 1, subtitleMessages.length - 1);
+      if (idx >= 0) subtitle.textContent = subtitleMessages[idx];
     }
 
-    function fadeNo() {
-      btnNo.classList.add('fade');
-      setTimeout(() => {
-        btnNo.classList.remove('fade');
-        btnNo.style.opacity = '';
-        changeText();
-      }, 700);
+    function updateBear() {
+      const idx = Math.min(Math.floor(tapCount / 2), bearMoods.length - 1);
+      bear.textContent = bearMoods[idx];
     }
 
-    function jellyNo() {
-      btnNo.classList.add('jelly');
-      changeText();
-      setTimeout(() => btnNo.classList.remove('jelly'), 500);
+    function updateHealth() {
+      // Show health bar after first tap
+      if (tapCount === 1) healthWrap.classList.add('visible');
+
+      // Drain health: fast at start, slows in middle, fast at end
+      const phase = getPhase();
+      let drain;
+      if (phase === 1) drain = 8;
+      else if (phase === 2) drain = 5;
+      else if (phase === 3) drain = 4;
+      else drain = 20;
+
+      noHealth = Math.max(0, noHealth - drain);
+      healthFill.style.width = noHealth + '%';
+
+      // Update health label
+      if (noHealth > 60) healthLabel.textContent = '❤️ "No" button resistance';
+      else if (noHealth > 30) healthLabel.textContent = '💔 "No" button weakening...';
+      else if (noHealth > 10) healthLabel.textContent = '😵 "No" button cracking!';
+      else healthLabel.textContent = '💀 "No" button almost gone!';
     }
 
-    function growYes() {
+    function growYesButton() {
+      yesGrowthLevel++;
       btnYes.classList.add('growing');
-      // Make Yes button bigger each time
-      const current = parseFloat(getComputedStyle(btnYes).fontSize);
-      btnYes.style.fontSize = Math.min(current * 1.12, 32) + 'px';
-      btnYes.style.padding = '16px 44px';
+      const baseSize = window.innerWidth <= 480 ? 16 : 17.6;
+      const newSize = Math.min(baseSize + yesGrowthLevel * 1.5, 36);
+      btnYes.style.fontSize = newSize + 'px';
+
+      const basePad = window.innerWidth <= 480 ? 12 : 14;
+      const newPad = Math.min(basePad + yesGrowthLevel * 2, 28);
+      btnYes.style.padding = `${newPad}px ${newPad * 2.2}px`;
+
       setTimeout(() => btnYes.classList.remove('growing'), 400);
     }
 
-    function duplicateYes() {
-      // Add another Yes button
-      const clone = btnYes.cloneNode(true);
-      clone.onclick = sayYes;
-      clone.style.animation = 'cardEntrance 0.5s cubic-bezier(0.34,1.56,0.64,1) both';
-      buttonsContainer.appendChild(clone);
+    // ─── Surrender sequence (phase 4) ───
+    function surrenderSequence() {
+      gameOver = true;
+
+      // Health drops to 0
+      noHealth = 0;
+      healthFill.style.width = '0%';
+      healthLabel.textContent = '💀 "No" button defeated!';
+
+      // Button transforms
+      btnNo.style.transition = 'all 0.6s ease';
+      btnNo.style.fontSize = '1.1rem';
+      btnNo.style.padding = '14px 36px';
+      btnNo.textContent = '...fine 😢💖';
+
+      // If runaway, animate back towards center
+      if (isRunaway) {
+        const centerX = window.innerWidth / 2 - 60;
+        const centerY = window.innerHeight / 2 + 60;
+        btnNo.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        btnNo.style.left = centerX + 'px';
+        btnNo.style.top = centerY + 'px';
+      }
+
+      // After a beat, transform into Yes
+      setTimeout(() => {
+        btnNo.style.background = 'var(--red)';
+        btnNo.style.color = 'var(--white)';
+        btnNo.style.borderColor = 'var(--red)';
+        btnNo.style.boxShadow = '0 4px 16px rgba(230, 57, 70, 0.35)';
+        btnNo.textContent = 'Ok... Yes! 💖';
+        playAnim(btnNo, 'jelly', 500);
+      }, 900);
+
+      // Trigger celebration
+      setTimeout(() => {
+        sayYes();
+      }, 2200);
+    }
+
+    // ─── Utility ───
+    function playAnim(el, className, duration) {
+      el.classList.remove(className);
+      void el.offsetWidth; // reflow to restart animation
+      el.classList.add(className);
+      setTimeout(() => el.classList.remove(className), duration);
     }
 
     // ─── Celebration ───
 
     function sayYes() {
+      if (document.getElementById('celebration').classList.contains('active')) return;
       document.getElementById('celebration').classList.add('active');
       startFireworks();
       spawnCelebrationHearts();
@@ -647,8 +968,6 @@
           ctx.globalAlpha = this.alpha;
           ctx.fillStyle = this.color;
           ctx.beginPath();
-
-          // Draw tiny hearts instead of circles sometimes
           if (Math.random() > 0.5) {
             drawHeart(ctx, this.x, this.y, this.size);
           } else {
@@ -687,7 +1006,6 @@
         ctx.fillStyle = 'rgba(255, 240, 243, 0.15)';
         ctx.fillRect(0, 0, W, H);
 
-        // Spawn new fireworks periodically
         if (frame % 35 === 0) {
           explode(
             W * 0.15 + Math.random() * W * 0.7,
@@ -707,7 +1025,6 @@
         requestAnimationFrame(animate);
       }
 
-      // Initial burst
       explode(W * 0.5, H * 0.3);
       setTimeout(() => explode(W * 0.3, H * 0.25), 200);
       setTimeout(() => explode(W * 0.7, H * 0.2), 400);
@@ -730,11 +1047,9 @@
         setTimeout(() => span.remove(), 5000);
       }
 
-      // Initial burst
       for (let i = 0; i < 20; i++) {
         setTimeout(spawn, i * 80);
       }
-      // Continuous
       setInterval(spawn, 250);
     }
   </script>
